@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<img src="photo_2026-03-26_16-59-52.jpg" style="width:120px;height:120px;border-radius:50%;margin-top:15px;border:3px solid white;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تلاوات الدكتور سعيد راضي</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Tahoma";
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: white;
+    text-align: center;
+    padding-bottom: 140px;
+}
+
+
+header {
+    padding: 30px 15px;
+    background: linear-gradient(135deg, #0ea5e9, #22c55e);
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    border-top-right-radius: 30px;
+    border-top-left-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+header h1 {
+    font-size: 28px;
+}
+
+header p {
+    opacity: 0.9;
+}
+
+
+#search {
+    margin: 20px auto;
+    width: 90%;
+    max-width: 500px;
+    padding: 12px;
+    border-radius: 15px;
+    border: none;
+    font-size: 16px;
+}
+
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    padding: 15px;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.card:hover {
+    transform: scale(1.05);
+    background: rgba(255,255,255,0.1);
+}
+
+.card.active {
+    background: #22c55e;
+    color: black;
+}
+
+.player-box {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #020617;
+    padding: 15px;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+}
+
+audio {
+    width: 90%;
+}
+
+.now {
+    margin-bottom: 10px;
+    font-size: 14px;
+    opacity: 0.8;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+    <h1>📖 تلاوات الدكتور سعيد راضي</h1>
+    <p>صدقة جارية - القرآن الكريم كامل</p>
+</header>
+
+<input type="text" id="search" placeholder="🔍 ابحث عن سورة...">
+
+<div class="grid" id="surah-list"></div>
+
+<div class="player-box">
+    <div class="now" id="nowPlaying">لم يتم تشغيل شيء</div>
+    <audio id="player" controls></audio>
+</div>
+
+<script>
+const surahs = [
+"الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
+"هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه",
+"الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم",
+"لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر",
+"فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق",
+"الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة",
+"الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج",
+"نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس",
+"التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد",
+"الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات",
+"القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر",
+"المسد","الإخلاص","الفلق","الناس"
+];
+
+const list = document.getElementById("surah-list");
+const player = document.getElementById("player");
+const search = document.getElementById("search");
+const nowPlaying = document.getElementById("nowPlaying");
+
+let currentIndex = null;
+
+function displaySurahs(filter = "") {
+    list.innerHTML = "";
+
+    surahs.forEach((name, index) => {
+        if (name.includes(filter)) {
+            let card = document.createElement("div");
+            card.className = "card";
+            card.textContent = `${index + 1}. ${name}`;
+
+            card.onclick = () => playSurah(index);
+
+            list.appendChild(card);
+        }
+    });
+}
+
+function playSurah(index) {
+    currentIndex = index;
+
+    let number = String(index + 1).padStart(3, '0');
+    player.src = "audio/" + number + ".mp3";
+    player.play();
+
+    nowPlaying.textContent = "🎧 الآن: " + surahs[index];
+
+    highlightActive(index);
+}
+
+
+function highlightActive(index) {
+    document.querySelectorAll(".card").forEach((card, i) => {
+        card.classList.remove("active");
+    });
+
+    let visibleCards = document.querySelectorAll(".card");
+    visibleCards.forEach(card => {
+        if (card.textContent.includes(surahs[index])) {
+            card.classList.add("active");
+        }
+    });
+}
+
+player.addEventListener("ended", () => {
+    if (currentIndex !== null && currentIndex < surahs.length - 1) {
+        playSurah(currentIndex + 1);
+    }
+});
+
+search.addEventListener("input", () => {
+    displaySurahs(search.value);
+});
+
+displaySurahs();
+</script>
+
+</body>
+</html>
